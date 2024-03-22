@@ -28,8 +28,8 @@ const flappyClubber = { // draw the bird
 const background = {
   spriteX: 390,
   spriteY: 0,
-  largura: 275,
-  altura: 204,
+  width: 275,
+  height: 204,
   positionX: 0,
   positionY: canvas.height - 204,
   draw() {
@@ -39,17 +39,43 @@ const background = {
     context.drawImage(
       sprites,
       background.spriteX, background.spriteY,
-      background.largura, background.altura,
+      background.width, background.height,
       background.positionX, background.positionY,
-      background.largura, background.altura,
+      background.width, background.height,
     );
 
     context.drawImage(
       sprites,
       background.spriteX, background.spriteY,
-      background.largura, background.altura,
-      (background.positionX + background.largura), background.positionY,
-      background.largura, background.altura,
+      background.width, background.height,
+      (background.positionX + background.width), background.positionY,
+      background.width, background.height,
+    );
+  },
+};
+
+const floor = {
+  spriteX: 0, //sprite size to get in the source
+  spriteY: 610, //sprite size to get in the source
+  width: 724, // sprite size on the app screen
+  height: 112, // sprite size on the app screen
+  positionX: 0, // position on the app screen
+  positionY: canvas.height - 112, //position on the app screen
+  draw() {
+    context.drawImage(
+      sprites,
+      floor.spriteX, floor.spriteY,
+      floor.width, floor.height,
+      floor.positionX, floor.positionY,
+      floor.width, floor.height,
+    );
+
+    context.drawImage(
+      sprites,
+      floor.spriteX, floor.spriteY,
+      floor.width, floor.height,
+      (floor.positionX), floor.positionY,
+      floor.width, floor.height,
     );
   },
 };
@@ -57,8 +83,9 @@ const background = {
 
 
 function loop() {
-  flappyClubber.draw();
   background.draw();
+  flappyClubber.draw();
+  floor.draw();
   requestAnimationFrame(loop);
 }
 
