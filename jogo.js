@@ -13,6 +13,16 @@ const flappyClubber = { // draw the bird
   altura: 24,
   positionX: 10,
   positionY: 50,
+  gravity: 0.25,
+  speed: 0,
+
+
+
+  animationDraw(){
+      flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
+      console.log(flappyClubber.speed);
+      flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
+  },
   draw() {
     context.drawImage( //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
       //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
@@ -84,8 +94,9 @@ const floor = {
 
 function loop() {
   background.draw();
-  flappyClubber.draw();
   floor.draw();
+  flappyClubber.draw();
+  flappyClubber.animationDraw();
   requestAnimationFrame(loop);
 }
 
