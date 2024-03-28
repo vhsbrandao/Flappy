@@ -17,8 +17,7 @@ const flappyClubber = { // draw the bird
   speed: 0,
 
 
-
-  animationDraw(){
+  update(){
       flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
       console.log(flappyClubber.speed);
       flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
@@ -64,6 +63,26 @@ const background = {
   },
 };
 
+const msgGetReady = {
+  spriteX: 134,
+  spriteY: 0,
+  width: 174,
+  height: 152,
+  positionX: (canvas.width / 2) - 174/2,
+  positionY: 50,
+
+  draw() {
+
+    context.drawImage(
+      sprites,
+      msgGetReady.spriteX, msgGetReady.spriteY,
+      msgGetReady.width, msgGetReady.height,
+      msgGetReady.positionX, msgGetReady.positionY,
+      msgGetReady.width, msgGetReady.height,
+    );
+  },
+};
+
 const floor = {
   spriteX: 0, //sprite size to get in the source
   spriteY: 610, //sprite size to get in the source
@@ -90,14 +109,57 @@ const floor = {
   },
 };
 
+//TELAS
 
+let activeScreen = {};
+function ChangeScreen(newScreen) {
+  activeScreen = newScreen;
+
+}
+
+const Screens = {
+  start: {
+    draw(){
+      background.draw();
+      floor.draw();
+      flappyClubber.draw();
+      msgGetReady.draw();
+    },
+
+    click(){
+      ChangeScreen(Screens.jogo);
+    },
+
+    update(){
+      flappyClubber.draw();
+    }
+
+  }
+
+}
+
+Screens.jogo = {
+  draw(){
+    background.draw();
+    floor.draw();
+    flappyClubber.draw();
+  },
+  update(){
+    flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
+    console.log(flappyClubber.speed);
+    flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
+  }
+}
 
 function loop() {
-  background.draw();
-  floor.draw();
-  flappyClubber.draw();
-  flappyClubber.animationDraw();
+  activeScreen.draw();
+  activeScreen.update();
   requestAnimationFrame(loop);
 }
 
+window.addEventListener('click', function () {
+  activeScreen.click() && activeScreen.click()
+});
+
+ChangeScreen(Screens.start);
 loop();
