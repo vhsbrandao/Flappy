@@ -1,37 +1,70 @@
-console.log('Flappy Clubber by vhsbrandao')
+console.log('Flappy Clubber by github.com/vhsbrandao/')
 
+const som_HIT = new Audio();
+som_HIT.src = './effects/hit.wav';
 const sprites = new Image();
 sprites.src = './sprites.png';
+
 
 const canvas = document.querySelector('canvas')
 const context = canvas.getContext("2d")
 
+
+
+
+function colision(flappyClubber, floor) {
+
+  const flappyClubberY = flappyClubber.positionY + flappyClubber.height;
+  const floorY = floor.positionY
+
+  if(flappyClubberY >= floorY) {
+      som_HIT.play();
+    return true;
+  }
+  return false;
+}
+function CreateFlappyClubber(params) {
 const flappyClubber = { // draw the bird
   spriteX: 0,
   spriteY: 0,
-  largura: 33,
-  altura: 24,
+  height: 33,
+  width: 24,
   positionX: 10,
   positionY: 50,
   gravity: 0.25,
   speed: 0,
+  heightjump: 4.6,
 
+
+  jump(){
+    flappyClubber.speed = - flappyClubber.heightjump
+  },
 
   update(){
-      flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
-      console.log(flappyClubber.speed);
-      flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
-  },
+   if(colision(flappyClubber, floor)) {
+    setTimeout(() => {
+      ChangeScreen(Screens.start);
+    }, 500);
+    return;
+
+   }
+   flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
+   flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
+
+},
+
   draw() {
     context.drawImage( //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
       //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
           sprites, // drawn sprites
           flappyClubber.spriteX, flappyClubber.spriteY, // sprite position x and y
-          flappyClubber.largura, flappyClubber.altura, //sprite size from the image
+          flappyClubber.height, flappyClubber.width, //sprite size from the image
           flappyClubber.positionX, flappyClubber.positionY, // to draw sprite position on the screen
-          flappyClubber.largura, flappyClubber.altura, // sprite size on the scren
+          flappyClubber.height, flappyClubber.width, // sprite size on the scren
     );
   }
+}
+return flappyClubber;
 }
 
 const background = {
@@ -66,8 +99,8 @@ const background = {
 const msgGetReady = {
   spriteX: 134,
   spriteY: 0,
-  width: 174,
   height: 152,
+  width: 224,
   positionX: (canvas.width / 2) - 174/2,
   positionY: 50,
 
@@ -86,16 +119,17 @@ const msgGetReady = {
 const floor = {
   spriteX: 0, //sprite size to get in the source
   spriteY: 610, //sprite size to get in the source
-  width: 724, // sprite size on the app screen
+  width: 524, // sprite size on the app screen
   height: 112, // sprite size on the app screen
   positionX: 0, // position on the app screen
   positionY: canvas.height - 112, //position on the app screen
+
   draw() {
     context.drawImage(
       sprites,
-      floor.spriteX, floor.spriteY,
+      (floor.spriteX + floor.spriteX), floor.spriteY,
       floor.width, floor.height,
-      floor.positionX, floor.positionY,
+      floor.width, floor.positionY,
       floor.width, floor.height,
     );
 
@@ -110,19 +144,23 @@ const floor = {
 };
 
 //TELAS
-
+const globals = {};
 let activeScreen = {};
 function ChangeScreen(newScreen) {
   activeScreen = newScreen;
-
+  activeScreen.inicialize && activeScreen.inicialize();
 }
 
 const Screens = {
   start: {
+    inicialize(){
+      globals.flappyClubber = CreateFlappyClubber();
+    },
+
     draw(){
       background.draw();
       floor.draw();
-      flappyClubber.draw();
+      globals.flappyClubber.draw();
       msgGetReady.draw();
     },
 
@@ -131,7 +169,7 @@ const Screens = {
     },
 
     update(){
-      flappyClubber.draw();
+      globals.flappyClubber.draw();
     }
 
   }
@@ -142,12 +180,15 @@ Screens.jogo = {
   draw(){
     background.draw();
     floor.draw();
-    flappyClubber.draw();
+    globals.flappyClubber.draw();
   },
+
+  click(){
+    globals.flappyClubber.jump();
+  },
+
   update(){
-    flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
-    console.log(flappyClubber.speed);
-    flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
+    globals.flappyClubber.update();
   }
 }
 
@@ -157,9 +198,10 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-window.addEventListener('click', function () {
-  activeScreen.click() && activeScreen.click()
-});
+window.addEventListener('click',function () {
+  activeScreen.click && activeScreen.click();
+}
+  );
 
 ChangeScreen(Screens.start);
 loop();
