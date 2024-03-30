@@ -9,9 +9,6 @@ sprites.src = './sprites.png';
 const canvas = document.querySelector('canvas')
 const context = canvas.getContext("2d")
 
-
-
-
 function colision(flappyClubber, floor) {
 
   const flappyClubberY = flappyClubber.positionY + flappyClubber.height;
@@ -23,17 +20,18 @@ function colision(flappyClubber, floor) {
   }
   return false;
 }
-function CreateFlappyClubber(params) {
-const flappyClubber = { // draw the bird
-  spriteX: 0,
-  spriteY: 0,
-  height: 33,
-  width: 24,
-  positionX: 10,
-  positionY: 50,
-  gravity: 0.25,
-  speed: 0,
-  heightjump: 4.6,
+
+function CreateFlappyClubber() {
+  const flappyClubber = { // draw the bird
+    spriteX: 0,
+    spriteY: 0,
+    height: 33,
+    width: 24,
+    positionX: 10,
+    positionY: 50,
+    gravity: 0.25,
+    speed: 0,
+    heightjump: 4.6,
 
 
   jump(){
@@ -41,7 +39,7 @@ const flappyClubber = { // draw the bird
   },
 
   update(){
-   if(colision(flappyClubber, floor)) {
+   if(colision(flappyClubber, globals.floor)) {
     setTimeout(() => {
       ChangeScreen(Screens.start);
     }, 500);
@@ -66,6 +64,48 @@ const flappyClubber = { // draw the bird
 }
 return flappyClubber;
 }
+
+// floor
+function createFloor() {
+  const floor = {
+    spriteX: 0, //sprite size to get in the source
+    spriteY: 610, //sprite size to get in the source
+    width: 334, // sprite size on the app screen
+    height: 112, // sprite size on the app screen
+    positionX: 0, // position on the app screen
+    positionY: canvas.height - 112, //position on the app screen
+
+    update() {
+    const moveFloor = 1;
+    const repeatFLoor = floor.width;
+    const move = floor.positionX - moveFloor;
+    floor.positionX = move % repeatFLoor;
+
+
+    },
+
+    draw() {
+      context.drawImage(
+        sprites,
+        floor.spriteX, floor.spriteY,
+        floor.width, floor.height,
+        floor.positionX, floor.positionY,
+        floor.width, floor.height,
+      );
+
+      context.drawImage(
+        sprites,
+        floor.spriteX, floor.spriteY,
+        floor.width, floor.height,
+        (floor.positionX + floor.width), floor.positionY,
+        floor.width, floor.height,
+      );
+    },
+  };
+  return floor;
+  };
+
+
 
 const background = {
   spriteX: 390,
@@ -116,33 +156,6 @@ const msgGetReady = {
   },
 };
 
-const floor = {
-  spriteX: 0, //sprite size to get in the source
-  spriteY: 610, //sprite size to get in the source
-  width: 524, // sprite size on the app screen
-  height: 112, // sprite size on the app screen
-  positionX: 0, // position on the app screen
-  positionY: canvas.height - 112, //position on the app screen
-
-  draw() {
-    context.drawImage(
-      sprites,
-      (floor.spriteX + floor.spriteX), floor.spriteY,
-      floor.width, floor.height,
-      floor.width, floor.positionY,
-      floor.width, floor.height,
-    );
-
-    context.drawImage(
-      sprites,
-      floor.spriteX, floor.spriteY,
-      floor.width, floor.height,
-      (floor.positionX), floor.positionY,
-      floor.width, floor.height,
-    );
-  },
-};
-
 //TELAS
 const globals = {};
 let activeScreen = {};
@@ -155,11 +168,12 @@ const Screens = {
   start: {
     inicialize(){
       globals.flappyClubber = CreateFlappyClubber();
+      globals.floor = createFloor();
     },
 
     draw(){
       background.draw();
-      floor.draw();
+      globals.floor.draw();
       globals.flappyClubber.draw();
       msgGetReady.draw();
     },
@@ -169,7 +183,7 @@ const Screens = {
     },
 
     update(){
-      globals.flappyClubber.draw();
+      globals.floor.update();
     }
 
   }
@@ -179,8 +193,8 @@ const Screens = {
 Screens.jogo = {
   draw(){
     background.draw();
-    floor.draw();
     globals.flappyClubber.draw();
+    globals.floor.draw();
   },
 
   click(){
@@ -189,6 +203,7 @@ Screens.jogo = {
 
   update(){
     globals.flappyClubber.update();
+    globals.floor.update();
   }
 }
 
