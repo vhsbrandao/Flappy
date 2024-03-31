@@ -4,18 +4,17 @@ const som_HIT = new Audio();
 som_HIT.src = './effects/hit.wav';
 const sprites = new Image();
 sprites.src = './sprites.png';
-
+let frames = 0;
 
 const canvas = document.querySelector('canvas')
 const context = canvas.getContext("2d")
 
 function colision(flappyClubber, floor) {
-
   const flappyClubberY = flappyClubber.positionY + flappyClubber.height;
   const floorY = floor.positionY
 
   if(flappyClubberY >= floorY) {
-      som_HIT.play();
+    som_HIT.play();
     return true;
   }
   return false;
@@ -33,36 +32,53 @@ function CreateFlappyClubber() {
     speed: 0,
     heightjump: 4.6,
 
+    jump(){
+      flappyClubber.speed = - flappyClubber.heightjump
+    },
 
-  jump(){
-    flappyClubber.speed = - flappyClubber.heightjump
-  },
+    update(){
+      if(colision(flappyClubber, globals.floor)) {
+        setTimeout(() => {
+          ChangeScreen(Screens.start);
+        }, 500);
+        return;
+      }
+      flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
+      flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
+    },
 
-  update(){
-   if(colision(flappyClubber, globals.floor)) {
-    setTimeout(() => {
-      ChangeScreen(Screens.start);
-    }, 500);
-    return;
+    movements: [
+      { spriteX: 0, spriteY: 0, },
+      { spriteX: 0, spriteY: 26, },
+      { spriteX: 0, spriteY: 52, },
+      { spriteX: 0, spriteY: 26, },
+    ],
+    ActualFrame: 0,
 
-   }
-   flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
-   flappyClubber.positionY = flappyClubber.positionY + flappyClubber.speed;
+    updateFrame(){
+      const gapFrames = 10;
+      const frameControl = frames % gapFrames === 0;
 
-},
-
-  draw() {
-    context.drawImage( //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-      //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-          sprites, // drawn sprites
-          flappyClubber.spriteX, flappyClubber.spriteY, // sprite position x and y
-          flappyClubber.height, flappyClubber.width, //sprite size from the image
-          flappyClubber.positionX, flappyClubber.positionY, // to draw sprite position on the screen
-          flappyClubber.height, flappyClubber.width, // sprite size on the scren
-    );
+     if(frameControl) {
+      const movementRoot = 1;
+      const increment = movementRoot + flappyClubber.ActualFrame;
+      const repeatMovement = flappyClubber.movements.length;
+      flappyClubber.ActualFrame = increment % repeatMovement
+    }
+    },
+    draw() {
+      flappyClubber.updateFrame();
+      const { spriteX, spriteY } = flappyClubber.movements[flappyClubber.ActualFrame]
+      context.drawImage(
+        sprites,
+        spriteX, spriteY,
+        flappyClubber.height, flappyClubber.width,
+        flappyClubber.positionX, flappyClubber.positionY,
+        flappyClubber.height, flappyClubber.width,
+      );
+    }
   }
-}
-return flappyClubber;
+  return flappyClubber;
 }
 
 // floor
@@ -76,12 +92,10 @@ function createFloor() {
     positionY: canvas.height - 112, //position on the app screen
 
     update() {
-    const moveFloor = 1;
-    const repeatFLoor = floor.width;
-    const move = floor.positionX - moveFloor;
-    floor.positionX = move % repeatFLoor;
-
-
+      const moveFloor = 1;
+      const repeatFLoor = floor.width;
+      const move = floor.positionX - moveFloor;
+      floor.positionX = move % repeatFLoor;
     },
 
     draw() {
@@ -103,9 +117,7 @@ function createFloor() {
     },
   };
   return floor;
-  };
-
-
+};
 
 const background = {
   spriteX: 390,
@@ -145,7 +157,6 @@ const msgGetReady = {
   positionY: 50,
 
   draw() {
-
     context.drawImage(
       sprites,
       msgGetReady.spriteX, msgGetReady.spriteY,
@@ -185,9 +196,7 @@ const Screens = {
     update(){
       globals.floor.update();
     }
-
   }
-
 }
 
 Screens.jogo = {
@@ -210,13 +219,13 @@ Screens.jogo = {
 function loop() {
   activeScreen.draw();
   activeScreen.update();
+  frames = frames + 1;
   requestAnimationFrame(loop);
 }
 
-window.addEventListener('click',function () {
+window.addEventListener('click', function () {
   activeScreen.click && activeScreen.click();
-}
-  );
+});
 
 ChangeScreen(Screens.start);
 loop();
