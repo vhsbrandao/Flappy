@@ -22,6 +22,5 @@
 <li>Desenvolvido por <b>Vhsbrandao</b></li>
 <li>Inspirado pelo jogo Flappy Bird.</li>
 </ul>
-
-    <p>Divirta-se jogando o Flappy Clubber! 🎶🕺💥</p>
+<p>Divirta-se jogando o Flappy Clubber! 🎶🕺💥</p>
 </html>
