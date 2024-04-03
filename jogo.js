@@ -2,6 +2,9 @@ console.log('Flappy Clubber by github.com/vhsbrandao/')
 
 const som_HIT = new Audio();
 som_HIT.src = './effects/hit.wav';
+const music = new Audio();
+music.src = './effects/music.wav';
+
 const sprites = new Image();
 sprites.src = './sprites.png';
 let frames = 0;
@@ -15,10 +18,14 @@ function colision(flappyClubber, floor) {
 
   if(flappyClubberY >= floorY) {
     som_HIT.play();
+    music.pause();
+    music.currentTime = 0;
     return true;
   }
   return false;
 }
+
+
 
 function CreateFlappyClubber() {
   const flappyClubber = { // draw the bird
@@ -66,9 +73,18 @@ function CreateFlappyClubber() {
       flappyClubber.ActualFrame = increment % repeatMovement
     }
     },
+
     draw() {
       flappyClubber.updateFrame();
       const { spriteX, spriteY } = flappyClubber.movements[flappyClubber.ActualFrame]
+      context.drawImage(
+        sprites,
+        spriteX, spriteY,
+        flappyClubber.height, flappyClubber.width,
+        flappyClubber.positionX, flappyClubber.positionY,
+        flappyClubber.height, flappyClubber.width,
+      );
+
       context.drawImage(
         sprites,
         spriteX, spriteY,
@@ -80,6 +96,107 @@ function CreateFlappyClubber() {
   }
   return flappyClubber;
 }
+
+function createPipe() {
+
+  const pipes = {
+    width: 52,
+    height:400,
+    floor: {
+      spriteX: 0,
+      spriteY: 169,
+    },
+    sky: {
+      spriteX: 52,
+      spriteY: 169,
+    },
+    space: 80,
+
+    draw() {
+      pipes.pairs.forEach(function (pair) {
+      const spaceBetween = 100;
+      const yRandom = pair.y;
+
+
+      // [PIPE SKY]
+      const pipeSkyX = pair.x;
+      const pipeSkyY = yRandom;
+
+      context.drawImage(
+        sprites,
+        pipes.sky.spriteX, pipes.sky.spriteY,
+        pipes.width, pipes.height,
+        pipeSkyX, pipeSkyY,
+        pipes.width, pipes.height,
+      )
+      // PIPE FLOOR
+        const pipeFloorX = pair.x;
+        const pipeFloorY = pipes.height + spaceBetween + yRandom;
+
+        context.drawImage(
+          sprites,
+          pipes.floor.spriteX, pipes.floor.spriteY,
+          pipes.width, pipes.height,
+          pipeFloorX, pipeFloorY,
+          pipes.width, pipes.height,
+        )
+
+      pair.pipeSky = {
+        x: pipeSkyX,
+        y: pipes.height + pipeSkyY
+      }
+      pair.pipeFloor = {
+        x: pipeFloorX,
+        y: pipeFloorY
+      }
+      })
+    },
+
+    hascCollision(pair) {
+
+      const flappyHead = globals.flappyClubber.positionY;
+      const flappyFoot = globals.flappyClubber.positionY + globals.flappyClubber.height;
+
+      if ((globals.flappyClubber.positionX + globals.flappyClubber.width) >= pair.x) {
+          if (flappyHead <= pair.pipeSky.y) {
+              return true;
+          }
+
+          if (flappyFoot >= pair.pipeFloor.y) {
+              return true;
+          }
+      }
+      return false;
+      },
+
+
+    pairs: [],
+
+    update() {
+      const passed100Frames = frames % 100 === 0;
+      if (passed100Frames) {
+        console.log('Passed 100 frames');
+        pipes.pairs.push({
+          x: canvas.width,
+          y: -150 * (Math.random() + 1),
+        });
+      }
+
+      pipes.pairs.forEach(function (pair) {
+        pair.x = pair.x - 2;
+
+        if(pipes.hascCollision(pair))
+        som_HIT.play();
+
+        if (pair.x + pipes.width <= 0) {
+          pipes.pairs.shift();
+      }
+      });
+    }
+  }
+    return pipes;
+}
+
 
 // floor
 function createFloor() {
@@ -179,6 +296,7 @@ const Screens = {
   start: {
     inicialize(){
       globals.flappyClubber = CreateFlappyClubber();
+      globals.pipes = createPipe();
       globals.floor = createFloor();
     },
 
@@ -203,15 +321,19 @@ Screens.jogo = {
   draw(){
     background.draw();
     globals.flappyClubber.draw();
+    globals.pipes.draw();
     globals.floor.draw();
   },
 
+
   click(){
+    music.play();
     globals.flappyClubber.jump();
   },
 
   update(){
     globals.flappyClubber.update();
+    globals.pipes.update();
     globals.floor.update();
   }
 }
