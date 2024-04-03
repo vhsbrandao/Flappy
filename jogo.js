@@ -45,9 +45,10 @@ function CreateFlappyClubber() {
 
     update(){
       if(colision(flappyClubber, globals.floor)) {
-        setTimeout(() => {
-          ChangeScreen(Screens.start);
-        }, 500);
+        som_HIT.play();
+        music.pause();
+        music.currentTime = 0;
+          ChangeScreen(Screens.GAME_OVER);
         return;
       }
       flappyClubber.speed = flappyClubber.speed + flappyClubber.gravity;
@@ -110,11 +111,11 @@ function createPipe() {
       spriteX: 52,
       spriteY: 169,
     },
-    space: 80,
+    space: 100,
 
     draw() {
       pipes.pairs.forEach(function (pair) {
-      const spaceBetween = 100;
+      const spaceBetween = 90;
       const yRandom = pair.y;
 
 
@@ -159,10 +160,16 @@ function createPipe() {
 
       if ((globals.flappyClubber.positionX + globals.flappyClubber.width) >= pair.x) {
           if (flappyHead <= pair.pipeSky.y) {
+              music.pause();
+              music.currentTime = 0;
+              ChangeScreen(Screens.GAME_OVER);
               return true;
           }
 
-          if (flappyFoot >= pair.pipeFloor.y) {
+          if (flappyFoot >= (pair.pipeFloor.y + 10)) {
+            music.pause();
+              music.currentTime = 0;
+            ChangeScreen(Screens.GAME_OVER);
               return true;
           }
       }
@@ -188,12 +195,14 @@ function createPipe() {
         if(pipes.hascCollision(pair))
         som_HIT.play();
 
+
         if (pair.x + pipes.width <= 0) {
           pipes.pairs.shift();
       }
       });
     }
   }
+
     return pipes;
 }
 
@@ -244,7 +253,7 @@ const background = {
   positionX: 0,
   positionY: canvas.height - 204,
   draw() {
-    context.fillStyle = '#00000';
+    context.fillStyle = '#000000';
     context.fillRect(0,0, canvas.width, canvas.height)
 
     context.drawImage(
@@ -284,6 +293,49 @@ const msgGetReady = {
   },
 };
 
+function createScore() {
+  const score = {
+    numbers: 0,
+    show: 0,
+    draw(){
+      context.font = '35px "Tac One"';
+      context.textAlign = 'right';
+      context.fillStyle = 'white';
+      context.fillText(`${score.numbers}`, canvas.width - 10, 35);
+    },
+    update(){
+      const betweenFrames = 10
+      const numb = frames % betweenFrames === 0;
+
+      if(numb){
+        score.numbers = score.numbers + 1
+      }
+
+    }
+  }
+    return score;
+}
+
+// [gameOverMessage]
+const gameOverMessage = {
+  sX: 134,
+  sY: 153,
+  w: 226,
+  h: 200,
+  x: (canvas.width / 2) - 226 / 2,
+  y: 50,
+  draw() {
+    context.drawImage(
+      sprites,
+      gameOverMessage.sX, gameOverMessage.sY,
+      gameOverMessage.w, gameOverMessage.h,
+      gameOverMessage.x, gameOverMessage.y,
+      gameOverMessage.w, gameOverMessage.h
+    );
+  }
+}
+
+
 //TELAS
 const globals = {};
 let activeScreen = {};
@@ -318,13 +370,18 @@ const Screens = {
 }
 
 Screens.jogo = {
+
+  inicialize(){
+    globals.score = createScore();
+  },
+
   draw(){
     background.draw();
     globals.flappyClubber.draw();
     globals.pipes.draw();
     globals.floor.draw();
+    globals.score.draw();
   },
-
 
   click(){
     music.play();
@@ -335,6 +392,19 @@ Screens.jogo = {
     globals.flappyClubber.update();
     globals.pipes.update();
     globals.floor.update();
+    globals.score.update();
+  }
+}
+
+Screens.GAME_OVER = {
+  draw() {
+    gameOverMessage.draw();
+  },
+  update() {
+
+  },
+  click() {
+    ChangeScreen(Screens.start);
   }
 }
 
