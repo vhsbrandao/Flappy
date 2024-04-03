@@ -320,10 +320,10 @@ function createScore() {
 const gameOverMessage = {
   sX: 134,
   sY: 153,
-  w: 226,
-  h: 200,
+  w: 206,
+  h: 100,
   x: (canvas.width / 2) - 226 / 2,
-  y: 50,
+  y: (canvas.height / 2),
   draw() {
     context.drawImage(
       sprites,
